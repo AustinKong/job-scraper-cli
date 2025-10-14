@@ -23,5 +23,5 @@ Text:
 {content}
 """)
 
-model = ChatOpenAI(model="gpt-4o").with_structured_output(Listing)
-listings_formatter = RunnablePassthrough.assign(_formatted=prompt | model | to_dict) | flatten(("_formatted",))
+model = ChatOpenAI(model="gpt-4o", temperature=0).with_structured_output(Listing)
+listings_formatter = RunnablePassthrough.assign(_formatted=prompt | model | to_dict) | flatten(("_formatted",)) | RunnablePassthrough.assign(keywords=lambda input: sorted(input["keywords"]))

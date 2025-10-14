@@ -68,14 +68,19 @@ def _url_dedup(url):
   url = _normalize_url(url)
 
   with sqlite3.connect("store.db") as db:
-    row = db.execute(
-      "SELECT id FROM listings WHERE url = ?",
-      (url,)
-    ).fetchone()
+    db.row_factory = sqlite3.Row
+    row = db.execute("""
+      SELECT url, content, simhash128, title, company, posted_date, description
+      FROM listings
+      WHERE url = ?
+    """, (url,)).fetchone()
 
-    if row:
-      return None
-    
-  return { "url": url }
+    if row is not None:
+      row = dict(row)
+      row["simhash128"] = int.from_bytes(row["simhash128"], "big")
+
+      return row | { "dedup_conf": 1.0 }
+
+  return { "url": url, "dedup_conf": 0.0 }
 
 url_dedup = RunnableLambda(_url_dedup)
