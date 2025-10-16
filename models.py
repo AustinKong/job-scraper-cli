@@ -1,5 +1,7 @@
+import json
+import os
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List, Self
 from datetime import date
 
 class Bullet(BaseModel):
@@ -13,10 +15,3 @@ class Experience(BaseModel):
   location: Optional[str]
   type: Optional[str] = None
   bullets: List[Bullet] = Field(default_factory=list)
-
-class Profile(BaseModel):
-  full_name: str
-  email: str
-  phone: str
-  location: Optional[str]
-  website: Optional[str]

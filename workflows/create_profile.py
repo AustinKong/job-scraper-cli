@@ -1,4 +1,4 @@
-# TODO: FIx
+import ui
 
 ui.print("Let's build your candidate profile")
 ui.print("This information will NOT be fed into LLMs, only fed to the resume formatter")

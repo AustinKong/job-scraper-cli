@@ -21,8 +21,8 @@ sample_urls = ["https://jobs.smartrecruiters.com/Grab/744000087062923-grit-train
 urls = sample_urls
 
 get_listings_chain = \
-  ui.with_spinner(url_dedup.map(), "URL deduping") | \
-  ui.with_spinner(RunnableBranch( # Scrape and format only if not found by URL dedup, we do this here because fuzzy dedup is extremely not reliable
+  ui.with_spinner_chain(url_dedup.map(), "URL deduping") | \
+  ui.with_spinner_chain(RunnableBranch( # Scrape and format only if not found by URL dedup, we do this here because fuzzy dedup is extremely not reliable
     (lambda input: isinstance(input, dict) and input["dedup_conf"] == 0, scraper | listings_formatter),
     RunnablePassthrough()
   ).map(), "Scraping and formatting listings")
