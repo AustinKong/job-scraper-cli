@@ -23,8 +23,8 @@ class Profile(BaseModel):
     except Exception as e:
       print(f"Error saving profile: {e}")
   
-  @ui.with_spinner("Loading profile...")
   @classmethod
+  @ui.with_spinner("Loading profile...")
   def load(cls) -> Optional[Self]:
     try:
       with open(PROFILE_PATH, "r") as f:
