@@ -4,6 +4,7 @@ load_dotenv()
 import ui
 from workflows.profile import setup_profile, show_profile
 from workflows.experience import list_experiences, add_experience
+from workflows.generate_resume import generate_resume
 
 def main():
   while True:
@@ -17,7 +18,7 @@ def main():
       ui.Choice("Exit", "exit")
     ]).ask():
       case "generate_cv":
-        print("Generating CV...")
+        generate_resume()
       case "show_profile":
         show_profile()
       case "setup_profile":

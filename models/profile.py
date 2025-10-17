@@ -1,10 +1,19 @@
 import json
 import os
 from pydantic import BaseModel, Field
-from typing import Optional, Self
+from typing import List, Optional, Self
 import ui
+from datetime import date
 
 PROFILE_PATH = os.getenv("PROFILE_PATH", "./data/profile.json")
+
+class Education(BaseModel):
+  institution: str
+  program: str
+  start_date: date
+  end_date: Optional[date]
+  location: Optional[str]
+  bullets: List[str] = Field(default_factory=list)
 
 # TODO: Add more descriptive error messages
 class Profile(BaseModel):
@@ -13,6 +22,7 @@ class Profile(BaseModel):
   phone: str
   location: Optional[str]
   website: Optional[str]
+  education: List[Education] = Field(default_factory=list)
 
   @ui.with_spinner("Saving profile...")
   def save(self):

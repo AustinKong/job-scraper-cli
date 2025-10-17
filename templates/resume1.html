@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Resume 1</title>
+
+    <style> 
+      /* Defines print safe whitespace */
+      @page { size: A4; margin: 18mm 16mm; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        font: 12pt Arial;
+        color: #000000;
+        background: #ffffff;
+      }
+      h1, h2, h3 { page-break-after: avoid; }
+      /* Defines readable whitespace */
+      .container { max-width: 760px; margin: 0 auto; }
+    </style>
+
+    {% macro section(title) -%}
+      <div class="section">
+        <h2>{{ title }}</h2>
+        {{ caller() }}
+      </div>
+    {%- endmacro %}
+
+    {% macro bullet(text) -%}
+      <li>{{ text }}</li>
+    {%- endmacro %}
+  </head>
+
+  <body>
+    <div class="container">
+      <header>
+        <h1>{{ ctx.full_name }}</h1>
+        <p>
+          {{ ctx.email }} | {{ ctx.phone }}
+          {% if ctx.location %}| {{ ctx.location }}{% endif %}
+          {% if ctx.website %}| <a href="{{ ctx.website }}">{{ ctx.website }}</a>{% endif %}
+        </p>
+      </header>
+
+      {% if ctx.skills %}
+        {% call section('Skills') %}
+          <p>{{ ctx.skills | join(', ') }}</p>
+        {% endcall %}
+      {% endif %}
+
+      {% if ctx.work_experience %}
+        {% call section('Work Experience') %}
+          {% for exp in ctx.work_experience %}
+            <div>
+                <div>
+                  <h3>{{ exp.title }}</h3>
+                  <p>{{ exp.start_date.strftime('%b %Y') }} - {% if exp.end_date %}{{ exp.end_date.strftime('%b %Y') }}{% else
+                    %}Present{% endif %}</p>
+                </div>
+                <div>
+                  <p>{{ exp.company }}</p>
+                  {% if exp.location %}<p>{{ exp.location }}</p>{% endif %}
+                </div>
+                <ul>
+                  {% for bullet_text in exp.bullets %}
+                  {{ bullet(bullet_text) }}
+                  {% endfor %}
+                </ul>
+            </div>
+          {% endfor %}
+        {% endcall %}
+      {% endif %}
+
+      {% if ctx.projects %}
+        {% call section('Projects') %}
+          {% for proj in ctx.projects %}
+            <div>
+              <div>
+                <h3>{{ proj.title }}</h3>
+                <p>{{ proj.start_date.strftime('%b %Y') }} - {% if proj.end_date %}{{ proj.end_date.strftime('%b %Y') }}{% else
+                  %}Present{% endif %}</p>
+              </div>
+              <div>
+                <p>{{ proj.company }}</p>
+                {% if proj.location %}<p>{{ proj.location }}</p>{% endif %}
+              </div>
+              <ul>
+                {% for bullet_text in proj.bullets %}
+                {{ bullet(bullet_text) }}
+                {% endfor %}
+              </ul>
+            </div>
+          {% endfor %}
+        {% endcall %}
+      {% endif %}
+
+      {% if ctx.education %}
+        {% call section('Education') %}
+          {% for edu in ctx.education %}
+              <div class="experience-item">
+                <div class="experience-header">
+                  <h3>{{ edu.program }}</h3>
+                  <p>{{ edu.start_date.strftime('%b %Y') }} - {% if edu.end_date %}{{ edu.end_date.strftime('%b %Y') }}{% else
+                    %}Present{% endif %}</p>
+                </div>
+                <div class="experience-header company-info">
+                  <p>{{ edu.institution }}</p>
+                  {% if edu.location %}<p>{{ edu.location }}</p>{% endif %}
+                </div>
+                <ul>
+                  {% for bullet_text in edu.bullets %}
+                  {{ bullet(bullet_text) }}
+                  {% endfor %}
+                </ul>
+              </div>
+          {% endfor %}
+        {% endcall %}
+      {% endif %}
+
+      {% if ctx.awards %}
+        {% call section('Awards') %}
+          <ul>
+            {% for award in ctx.awards %}
+            {{ bullet(award) }}
+            {% endfor %}
+          </ul>
+        {% endcall %}
+      {% endif %}
+    </div>
+  </body>
+</html>
