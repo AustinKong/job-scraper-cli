@@ -8,31 +8,32 @@ from workflows.generate_resume import generate_resume
 
 def main():
   while True:
-    ui.print("Job Scraper v0.1")
-    match ui.select("What would you like to do?", choices=[
-      ui.Choice("Generate CV from job listings", "generate_cv"),
-      ui.Choice("Show candidate profile", "show_profile"),
-      ui.Choice("Setup candidate profile", "setup_profile"),
-      ui.Choice("Show work experiences", "show_experiences"),
-      ui.Choice("Add work experience", "add_experience"),
-      ui.Choice("Test", "test"),
-      ui.Choice("Exit", "exit")
+    match ui.accordion("Job Scraper v0.1", groups=[
+      ("Profile", [
+        "Show profile",
+        "Setup profile"
+      ]),
+      ("Experiences", [
+        "Show experiences",
+        "Add experience"
+      ]),
+      "Generate resume",
+      "Exit"
     ]).ask():
-      case "generate_cv":
-        generate_resume()
-      case "show_profile":
+      case "Show profile":
         show_profile()
-      case "setup_profile":
+      case "Setup profile":
         setup_profile()
-      case "show_experiences":
+      case "Show experiences":
         list_experiences()
-      case "add_experience":
+      case "Add experience":
         add_experience()
-      case "test":
-        ui.bullets("Test List Input").ask()
-      case "exit":
-        ui.print("Goodbye!")
-        return
+      case "Generate resume":
+        generate_resume()
+      case "Exit":
+        break
+      case None:
+        break
 
 if __name__ == "__main__":
   main()
