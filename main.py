@@ -15,6 +15,7 @@ def main():
       ui.Choice("Setup candidate profile", "setup_profile"),
       ui.Choice("Show work experiences", "show_experiences"),
       ui.Choice("Add work experience", "add_experience"),
+      ui.Choice("Test", "test"),
       ui.Choice("Exit", "exit")
     ]).ask():
       case "generate_cv":
@@ -27,6 +28,8 @@ def main():
         list_experiences()
       case "add_experience":
         add_experience()
+      case "test":
+        ui.bullets("Test List Input").ask()
       case "exit":
         ui.print("Goodbye!")
         return

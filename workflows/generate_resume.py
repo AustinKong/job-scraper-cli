@@ -93,6 +93,6 @@ def generate_resume():
 
   output_filename = "outputs/jane_doe_resume.pdf"
 
-  template = env.get_template("resume1.html")
+  template = env.get_template("template-1.html")
   html = weasyprint.HTML(string=template.render(ctx=resume_context.model_dump()))
   html.write_pdf(output_filename)

@@ -20,7 +20,7 @@ def add_experience():
   start_date, end_date = ui.date_range("What is the date range of this experience?").ask()
   location = ui.text("What is the location of this job? (e.g., City, Country or Remote)").ask()
   
-  bullets = ui.list("Now, let's add some bullet points describing your responsibilities and achievements in this role.").ask()
+  bullets = ui.bullets("Now, let's add some bullet points describing your responsibilities and achievements in this role.").ask()
 
   experience = Experience(
     title=title,
