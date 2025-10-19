@@ -1,6 +1,14 @@
 import ui
 from models import Profile
 
+def setup_education():
+  test = ui.form(
+    date=ui.date("Enter a date"),
+    date_range=ui.date_range("enter a date range"),
+    selection=ui.select("selection", ['a', 'b', 'c'])
+  ).ask()
+  print(test)
+
 def setup_profile():
   ui.print("Let's build your candidate profile")
   ui.print("This information will NOT be fed into LLMs, only fed to the resume formatter")

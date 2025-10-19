@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import ui
-from workflows.profile import setup_profile, show_profile
+from workflows.profile import setup_profile, show_profile, setup_education
 from workflows.experience import list_experiences, add_experience
 from workflows.generate_resume import generate_resume
 
@@ -11,7 +11,8 @@ def main():
     match ui.accordion("Job Scraper v0.1", groups=[
       ("Profile", [
         "Show profile",
-        "Setup profile"
+        "Setup profile",
+        "Setup education"
       ]),
       ("Experiences", [
         "Show experiences",
@@ -24,6 +25,8 @@ def main():
         show_profile()
       case "Setup profile":
         setup_profile()
+      case "Setup education":
+        setup_education()
       case "Show experiences":
         list_experiences()
       case "Add experience":
