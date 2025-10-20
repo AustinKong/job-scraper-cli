@@ -40,3 +40,11 @@ class Bullet(BaseModel):
     except Exception as e:
       print(f"Error loading bullets: {e}")
       return []
+  
+  @classmethod
+  def to_texts(cls, bullets: List[Self]) -> List[str]:
+    return [bullet.text for bullet in bullets]
+
+  @classmethod
+  def from_texts(cls, texts: List[str]) -> List[Self]:
+    return [cls(text=text) for text in texts]

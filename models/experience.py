@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List, Self
+from typing import Optional, List, Self, Literal
 from datetime import date
 import ui
 import os
@@ -10,6 +10,8 @@ from models.bullet import Bullet
 
 EXPERIENCES_PATH = os.getenv("EXPERIENCES_PATH", "./data/experiences.json")
 
+type ExperienceType = Literal["work", "volunteer", "internship", "project", "contract", "freelance"]
+
 class Experience(BaseModel):
   id: uuid.UUID = Field(default_factory=uuid.uuid4)
   title: str
@@ -17,7 +19,7 @@ class Experience(BaseModel):
   start_date: date
   end_date: Optional[date]
   location: Optional[str]
-  type: Optional[str] = None
+  type: ExperienceType
   bullets: List[Bullet] = Field(default_factory=list, exclude=True)
 
   # Helper method to load without spinner, used for save to avoid two spinners
@@ -35,21 +37,28 @@ class Experience(BaseModel):
   def load_all(cls) -> List[Self]:
     return cls._load_all()
 
+  @classmethod
   @ui.with_spinner("Saving experience...")
-  def save(self):
+  def save_all(cls, experiences: List[Self]) -> None:
     os.makedirs(os.path.dirname(EXPERIENCES_PATH), exist_ok=True)
     try:
-      experiences = self._load_all()
-
-      ids = [e.id for e in experiences]
-      if self.id in ids:
-        experiences[ids.index(self.id)] = self
-      else:
-        experiences.append(self)
-
       with open(EXPERIENCES_PATH, "w") as f:
         json.dump([exp.model_dump(mode="json") for exp in experiences], f)
-      
-      Bullet.save_all(self.id, self.bullets)
+
+      for exp in experiences:
+        Bullet.save_all(exp.id, exp.bullets)
+
     except Exception as e:
       print(f"Error saving experience: {e}")
+  
+  @classmethod
+  def empty(cls, type: ExperienceType = "work") -> Self:
+    return cls(
+      title="",
+      company="",
+      start_date=date.today(),
+      end_date=None,
+      location="",
+      type=type,
+      bullets=[]
+    )

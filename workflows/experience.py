@@ -1,34 +1,83 @@
-from models.bullet import Bullet
 import ui
-from models import Experience
+from models import Experience, Bullet
+from typing import Optional
 
-def list_experiences():
-  experiences = Experience.load_all()
+WORK_EXPERIENCE_TYPES = ["work", "volunteer", "internship", "contract", "freelance"]
 
-  for exp in experiences:
-    ui.print(f" - {exp.title} at {exp.company} ({exp.start_date} to {exp.end_date or 'Present'})")
-    for bullet in exp.bullets:
-      ui.print(f"   - {bullet.text}")
+def _display_experience(exp: Experience) -> None:
+  ui.print(
+    f"{exp.title} at {exp.company}\n"
+    f"{exp.start_date} - {exp.end_date or 'Present'}\n"
+    f"Location: {exp.location or 'N/A'}\n"
+    f"Responsibilities and Achievements:\n"
+    f" - {"\n - ".join(Bullet.to_texts(exp.bullets))}"
+  )
+  ui.press_any_key_to_continue().ask()
 
-  return None
+def _modify_work(work: Experience = Experience.empty()) -> Optional[Experience]:
+  """
+  Modify or create a work experience entry, includes work, volunteer, internship, contract, freelance.
+  """
+  entry = ui.form(
+    title=ui.text("What is your job title?", default=work.title),
+    company=ui.text("What is the company name?", default=work.company),
+    type=ui.select("What type of work is this?", choices=[ui.Choice(title=type.capitalize(), value=type) for type in WORK_EXPERIENCE_TYPES], default=work.type),
+    start_end_date=ui.date_range("What is the date range of this experience?", default_start=work.start_date, default_end=work.end_date),
+    location=ui.text("What is the location of this job?", instruction="(Optional)", default=work.location or ""),
+    bullets=ui.bullets("Describe your responsibilities and achievements in this role.", default=Bullet.to_texts(work.bullets))
+  ).ask()
 
-def add_experience():
-  ui.print("Let's add a new work experience")
+  if entry is None:
+    return None
 
-  title = ui.text("What is your job title?").ask()
-  company = ui.text("What is the company name?").ask()
-  start_date, end_date = ui.date_range("What is the date range of this experience?").ask()
-  location = ui.text("What is the location of this job? (e.g., City, Country or Remote)").ask()
-  
-  bullets = ui.bullets("Now, let's add some bullet points describing your responsibilities and achievements in this role.").ask()
+  entry["start_date"], entry["end_date"] = entry.pop("start_end_date")
+  entry["bullets"] = Bullet.from_texts(entry.pop("bullets"))
 
-  experience = Experience(
-    title=title,
-    company=company,
-    start_date=start_date,
-    end_date=end_date if end_date else None,
-    location=location,
-    bullets=[Bullet(text=b) for b in bullets]
+  return Experience(**entry)
+
+def _modify_project(project: Experience = Experience.empty("project")) -> Optional[Experience]:
+  """
+  Modify or create a project experience entry.
+  """
+  entry = ui.form(
+    title=ui.text("What is the project title?", default=project.title),
+    company=ui.text("What is the organization or client name?", default=project.company),
+    start_end_date=ui.date_range("What is the date range of this project?", default_start=project.start_date, default_end=project.end_date),
+    location=ui.text("What is the location of this project?", instruction="(Optional)", default=project.location or ""),
+    bullets=ui.bullets("Describe your responsibilities and achievements in this project.", default=Bullet.to_texts(project.bullets))
+  ).ask()
+
+  if entry is None:
+    return None
+
+  entry["start_date"], entry["end_date"] = entry.pop("start_end_date")
+  entry["bullets"] = Bullet.from_texts(entry.pop("bullets"))
+  entry["type"] = "project"
+
+  return Experience(**entry)
+
+def work_history():
+  work_history = [e for e in Experience.load_all() if e.type in WORK_EXPERIENCE_TYPES]
+
+  work_history = ui.list_editor(
+    "Work history",
+    work_history,
+    display_fn=_display_experience,
+    modify_fn=_modify_work,
+    label_fn=lambda e: f"{e.title} at {e.company}"
   )
 
-  experience.save()
+  Experience.save_all(work_history)
+
+def project_history():
+  project_history = [e for e in Experience.load_all() if e.type == "project"]
+
+  project_history = ui.list_editor(
+    "Project history",
+    project_history,
+    display_fn=_display_experience,
+    modify_fn=_modify_project,
+    label_fn=lambda e: f"{e.title}"
+  )
+
+  Experience.save_all(project_history)

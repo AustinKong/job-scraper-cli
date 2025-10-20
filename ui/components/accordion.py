@@ -16,7 +16,8 @@ def accordion(
   message: str,
   groups: List[Outer],
   qmark: str = DEFAULT_QUESTION_PREFIX,
-  style: Optional[Style] = None
+  style: Optional[Style] = None,
+  wrap: bool = True
 ) -> Question:
   merged = merge_styles_default([style])
   # Normalize groups: single strings become (string, [string])
@@ -150,7 +151,7 @@ def accordion(
     return kb
 
   control = FormattedTextControl(_render, focusable=True, key_bindings=_bindings())
-  body = Window(content=control, always_hide_cursor=True)
+  body = Window(content=control, always_hide_cursor=True, wrap_lines=wrap)
   app = Application(
     layout=Layout(HSplit([_header(), body])),
     full_screen=False,

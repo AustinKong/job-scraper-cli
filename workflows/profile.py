@@ -37,7 +37,6 @@ def setup_profile():
     website="",
     education=[]
   )
-  # ui.print("This information will NOT be fed into LLMs, only fed to the resume formatter")
 
   data = ui.form(
     full_name=ui.text("What is your full legal name?", default=profile.full_name),
@@ -49,44 +48,15 @@ def setup_profile():
 
   data["education"] = profile.education if profile else []
 
-  while True:
-    options = []
-    label_to_index = {}
-
-    for i, e in enumerate(data["education"]):
-      label = original_label = f"{e.institution} - {e.program}"
-      count = 1
-
-      while label in label_to_index:
-        label = f"{original_label} ({count})"
-        count += 1
-      
-      label_to_index[label] = i
-      options.append((label, ["Edit", "Delete"]))
-    
-    options += ["New entry", "Exit"]
-
-    match ui.accordion("Editing education history", options).ask():
-      case (label, "Edit"):
-        entry_idx = label_to_index[label]
-        updated_entry = _setup_one_education(default=data["education"][entry_idx])
-        if updated_entry:
-          data["education"][entry_idx] = updated_entry
-      case (label, "Delete"):
-        entry_idx = label_to_index[label]
-        if ui.confirm(f"Are you sure you want to delete '{label}'?").ask():
-          data["education"].pop(entry_idx)
-      case "New entry":
-        new_entry = _setup_one_education()
-        if new_entry:
-          data["education"].append(new_entry)
-      case "Exit":
-        break
-      case None:
-        break
+  ui.list_editor(
+    "Education history",
+    data["education"],
+    display_fn=lambda e: ui.print(f"{e.institution} - {e.program}"), # TODO: MAke better
+    modify_fn=_setup_one_education,
+    label_fn=lambda e: f"{e.institution} - {e.program}"
+  )
 
   profile = Profile(**data)
-
   profile.save()
 
 def show_profile():

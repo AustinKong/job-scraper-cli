@@ -38,10 +38,10 @@ def with_spinner(message: str):
       with yaspin(text=message) as spinner:
         try:
           result = func(*args, **kwargs)
-          spinner.ok("✅")
+          spinner.ok("✔️")
           return result
         except Exception as e:
-          spinner.fail("💥")
+          spinner.fail("⚠️")
           raise e
 
     return wrapper
