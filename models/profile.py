@@ -7,16 +7,16 @@ from datetime import date
 
 PROFILE_PATH = os.getenv("PROFILE_PATH", "./data/profile.json")
 
-class Education(BaseModel):
-  institution: str
-  program: str
-  start_date: date
-  end_date: Optional[date]
-  location: Optional[str]
-  bullets: List[str] = Field(default_factory=list)
-
 # TODO: Add more descriptive error messages
 class Profile(BaseModel):
+  class Education(BaseModel):
+    institution: str
+    program: str
+    start_date: date
+    end_date: Optional[date]
+    location: Optional[str]
+    bullets: List[str] = Field(default_factory=list)
+
   full_name: str
   email: str
   phone: str
@@ -29,7 +29,7 @@ class Profile(BaseModel):
     os.makedirs(os.path.dirname(PROFILE_PATH), exist_ok=True)
     try:
       with open(PROFILE_PATH, "w") as f:
-        json.dump(self.model_dump(), f)
+        json.dump(self.model_dump(mode="json"), f)
     except Exception as e:
       print(f"Error saving profile: {e}")
   

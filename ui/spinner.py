@@ -17,10 +17,10 @@ def with_spinner_chain(runnable: Runnable, message: str):
     with yaspin(text=message) as spinner:
       try:
         out = runnable.invoke(input, config=config)
-        spinner.ok("✅")
+        spinner.ok("✔️")
         return out
       except Exception as e:
-        spinner.fail("💥")
+        spinner.fail("⚠️")
         raise e
 
   return RunnableLambda(_invoke_with_spinner)

@@ -139,6 +139,10 @@ def make_key_bindings(buf: Buffer, suspend) -> KeyBindings:
       event.app.exit(result=final_items)
       return
 
+    if in_prefix(forward=True):
+      buf.cursor_right(count=_prefix_len(doc.current_line) - doc.cursor_position_col)
+      doc = buf.document
+
     items = _split_items(doc.text or "")
     next_num = row + 2 if row < len(items) else len(items) + 1
     insert_text = f"\n{next_num}. "
@@ -189,15 +193,20 @@ def make_key_bindings(buf: Buffer, suspend) -> KeyBindings:
     if p:
       buf.cursor_right(count=p)
 
-  # disable vertical navigation
-  @kb.add("up")
-  def _(event): event.app.output.bell()
-  @kb.add("down")
-  def _(event): event.app.output.bell()
-  @kb.add("c-p")
-  def _(event): event.app.output.bell()
-  @kb.add("c-n")
-  def _(event): event.app.output.bell()
+  @kb.add("c-c")
+  def _(event):
+    event.app.exit(result=None)
+  
+  @kb.add("<any>")
+  def _(event):
+    if not event.data:
+      return
+
+    if in_prefix(forward=True):
+      event.app.output.bell()
+      return
+
+    buf.insert_text(event.data)
 
   return kb
 
@@ -224,6 +233,7 @@ def bullets(
   qmark: str = DEFAULT_QUESTION_PREFIX,
   style: Optional[Style] = None,
   instruction: Optional[str] = "(Enter on blank to finish)",
+  default: List[str] = [],
   wrap: bool = True,
 ) -> Question:
   """
@@ -239,7 +249,9 @@ def bullets(
   merged_style = merge_styles_default([style])
 
   buf = Buffer(multiline=True)
-  buf.set_document(Document("1. ", cursor_position=3))
+  initial_text = _render(default) if default else "1. "
+  initial_cursor = len(initial_text) if default else 3
+  buf.set_document(Document(initial_text, cursor_position=initial_cursor))
   suspend = attach_normalizer(buf)
   kb = make_key_bindings(buf, suspend)
 

@@ -1,11 +1,12 @@
-from typing import Any, Optional, Tuple, List
+from typing import Any, Optional, Tuple
 from prompt_toolkit import PromptSession
+from prompt_toolkit.document import Document
 from questionary.styles import merge_styles_default
 from questionary.constants import DEFAULT_KBI_MESSAGE, DEFAULT_QUESTION_PREFIX
-from questionary import Validator, ValidationError, Question
+from questionary import ValidationError, Question
 from questionary.prompts.common import build_validator
 from prompt_toolkit.lexers import SimpleLexer
-from datetime import datetime
+from datetime import datetime, date as dt_date
 
 DATE_FORMAT = "%Y/%m"
 
@@ -19,7 +20,7 @@ def _build_header(message, instruction = "(Date in 'YYYY/MM' format)", qmark = D
   return _header
 
 class DateQuestion(Question):
-  def __init__(self, message: str, **kwargs: Any):
+  def __init__(self, message: str, default: Optional[dt_date] = None, **kwargs: Any):
     merged_style = merge_styles_default([kwargs.get("style")])
 
     session: PromptSession = PromptSession(
@@ -30,8 +31,12 @@ class DateQuestion(Question):
       **kwargs
     )
 
+    if default:
+      session.default_buffer.reset(Document(dt_date.strftime(default, DATE_FORMAT)))
+
     super().__init__(session.app)
     self.message = message
+    self.default = default
 
   def validate(self, text):
     text = text.strip()
@@ -58,7 +63,7 @@ class DateQuestion(Question):
     return self._parse_response(super().unsafe_ask(patch_stdout=patch_stdout))
 
 class DateRangeQuestion(Question):
-  def __init__(self, message: str, **kwargs: Any):
+  def __init__(self, message: str, default_start: Optional[dt_date] = None, default_end: Optional[dt_date] = None, **kwargs: Any):
     merged_style = merge_styles_default([kwargs.get("style")])
 
     session: PromptSession = PromptSession(
@@ -68,6 +73,11 @@ class DateRangeQuestion(Question):
       lexer=SimpleLexer("class:answer"),
       **kwargs
     )
+
+    if default_start:
+      session.default_buffer.reset(Document(
+        f"{dt_date.strftime(default_start, DATE_FORMAT)}-{dt_date.strftime(default_end, DATE_FORMAT) if default_end else ''}"
+      ))
 
     super().__init__(session.app)
     self.message = message
@@ -111,8 +121,8 @@ class DateRangeQuestion(Question):
   def unsafe_ask(self, patch_stdout: bool = False) -> Any:
     return self._parse_response(super().unsafe_ask(patch_stdout))
 
-def date(message: str):
-  return DateQuestion(message)
+def date(message: str, default: Optional[dt_date] = None):
+  return DateQuestion(message, default=default)
 
-def date_range(message: str):
-  return DateRangeQuestion(message)
+def date_range(message: str, default_start: Optional[dt_date] = None, default_end: Optional[dt_date] = None):
+  return DateRangeQuestion(message, default_start=default_start, default_end=default_end)

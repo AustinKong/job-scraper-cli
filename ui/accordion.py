@@ -140,7 +140,7 @@ def accordion(
       selected_text = groups_filtered[outer_idx][1][inner_idx]
       event.app.layout = Layout(HSplit([_header()]))
       event.app.invalidate()
-      event.app.exit(result=selected_text)
+      event.app.exit(result=(groups_filtered[outer_idx][0], selected_text) if isinstance(groups[outer_idx], tuple) else groups[outer_idx])
 
     @kb.add("escape")
     @kb.add("c-c")

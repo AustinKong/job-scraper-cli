@@ -1,5 +1,5 @@
 from questionary import (
-  print, text, checkbox, Choice, select, form
+  print, text, checkbox, Choice, select, form, confirm
 )
 from ui.bullets import bullets
 from ui.spinner import with_spinner_chain, with_spinner
@@ -8,5 +8,5 @@ from ui.accordion import accordion
 
 __all__ = [
   "print", "text", "checkbox", "Choice", "bullets", "with_spinner", "select",
-  "date", "date_range", "with_spinner_chain", "accordion", "form"
+  "date", "date_range", "with_spinner_chain", "accordion", "form", "confirm"
 ]
