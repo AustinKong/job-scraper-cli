@@ -5,14 +5,14 @@ from typing import Optional
 WORK_EXPERIENCE_TYPES = ["work", "volunteer", "internship", "contract", "freelance"]
 
 def _display_experience(exp: Experience) -> None:
-  ui.print(
-    f"{exp.title} at {exp.company}\n"
-    f"{exp.start_date} - {exp.end_date or 'Present'}\n"
-    f"Location: {exp.location or 'N/A'}\n"
-    f"Responsibilities and Achievements:\n"
-    f" - {"\n - ".join(Bullet.to_texts(exp.bullets))}"
-  )
-  ui.press_any_key_to_continue().ask()
+  ui.print_key_values({
+    "Title": exp.title,
+    "Company": exp.company,
+    "Type": exp.type.capitalize(),
+    "Date range": f"{str(exp.start_date)} - {str(exp.end_date) if exp.end_date else 'Present'}",
+    "Location": exp.location or "N/A"
+  })
+  ui.print_bullets("Responsibilities and Achievements:", Bullet.to_texts(exp.bullets))
 
 def _modify_work(work: Experience = Experience.empty()) -> Optional[Experience]:
   """

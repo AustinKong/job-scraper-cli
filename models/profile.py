@@ -7,7 +7,6 @@ from datetime import date
 
 PROFILE_PATH = os.getenv("PROFILE_PATH", "./data/profile.json")
 
-# TODO: Add more descriptive error messages
 class Profile(BaseModel):
   class Education(BaseModel):
     institution: str
@@ -16,6 +15,17 @@ class Profile(BaseModel):
     end_date: Optional[date]
     location: Optional[str]
     bullets: List[str] = Field(default_factory=list)
+
+    @classmethod
+    def empty(cls) -> Self:
+      return cls(
+        institution="",
+        program="",
+        start_date=date.today(),
+        end_date=None,
+        location="",
+        bullets=[]
+      )
 
   full_name: str
   email: str
@@ -42,3 +52,14 @@ class Profile(BaseModel):
         return cls(**data)
     except Exception:
       return None
+
+  @classmethod
+  def empty(cls) -> Self:
+    return cls(
+      full_name="",
+      email="",
+      phone="",
+      location="",
+      website="",
+      education=[]
+    )

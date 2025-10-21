@@ -1,5 +1,6 @@
 from typing import Any, List, Callable, Optional
 import ui
+import os
 
 def list_editor(
   message: str,
@@ -34,12 +35,16 @@ def list_editor(
     
     options += ["New", "Exit"]
 
+    ui.clear()
     match ui.accordion(message, options).ask():
       case (label, "Show"):
         item_idx = label_to_index[label]
+        ui.clear()
         display_fn(items[item_idx])
+        ui.press_any_key_to_continue().ask()
       case (label, "Edit"):
         item_idx = label_to_index[label]
+        ui.clear()
         updated_item = modify_fn(items[item_idx])
         if updated_item is not None:
           items[item_idx] = updated_item
@@ -48,6 +53,7 @@ def list_editor(
         if ui.confirm(f"Are you sure you want to delete '{label}'?").ask():
           items.pop(item_idx)
       case "New":
+        ui.clear()
         new_item = modify_fn(None)
         if new_item is not None:
           items.append(new_item)

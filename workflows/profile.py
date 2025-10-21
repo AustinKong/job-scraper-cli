@@ -1,74 +1,85 @@
 import ui
 from models import Profile
-from types import SimpleNamespace
-from typing import Optional, Tuple
+from typing import Optional
 
-def _setup_one_education(default: Optional[Profile.Education] = None):
-  education = default or SimpleNamespace(
-    institution="",
-    program="",
-    start_date=None,
-    end_date=None,
-    location="",
-    bullets=[]
-  )
+def _display_education(edu: Profile.Education) -> None:
+  ui.print_key_values({
+    "Institution": edu.institution,
+    "Program": edu.program,
+    "Date range": f"{str(edu.start_date)} - {str(edu.end_date) if edu.end_date else 'Present'}",
+    "Location": edu.location or "N/A"
+  })
+  ui.print_bullets("Achievements and Activities:", edu.bullets)
 
-  data = ui.form(
-    institution=ui.text("What is the institution name?", default=education.institution),
-    program=ui.text("What is the program name?", default=education.program),
-    start_end_date=ui.date_range("What is the start and end date?", default_start=education.start_date, default_end=education.end_date),
-    location=ui.text("What is the location?", default=(education.location or "")),
-    bullets=ui.bullets("Describe your achievements or activities.", default=education.bullets)
+def _modify_education(edu: Profile.Education) -> Optional[Profile.Education]:
+  """
+  Modify or create an education entry.
+  """
+  edu = edu or Profile.Education.empty()
+
+  entry = ui.form(
+    institution=ui.text("What is the institution name?", default=edu.institution),
+    program=ui.text("What is the program name?", default=edu.program),
+    start_end_date=ui.date_range("What is the start and end date?", default_start=edu.start_date, default_end=edu.end_date),
+    location=ui.text("What is the location?", instruction="(Optional)", default=(edu.location or "")),
+    bullets=ui.bullets("Describe your achievements or activities.", default=edu.bullets)
   ).ask()
 
-  if data is None:
+  if entry is None:
     return None
 
-  start_date, end_date = data.pop("start_end_date")
+  entry["start_date"], entry["end_date"] = entry.pop("start_end_date")
 
-  return Profile.Education(**data, start_date=start_date, end_date=end_date)
+  return Profile.Education(**entry)
 
-def setup_profile():
-  profile = Profile.load() or SimpleNamespace(
-    full_name="",
-    email="",
-    phone="",
-    location="",
-    website="",
-    education=[]
-  )
+def setup_profile_basic():
+  profile = Profile.load() or Profile.empty()
 
   data = ui.form(
     full_name=ui.text("What is your full legal name?", default=profile.full_name),
     email=ui.text("What is your email address?", default=profile.email),
     phone=ui.text("What is your phone number?", default=profile.phone),
-    location=ui.text("What is your location?", instruction="Optional", default=(profile.location or "")),
-    website=ui.text("What is your website URL?", instruction="Optional", default=(profile.website or ""))
+    location=ui.text("What is your location?", instruction="(Optional)", default=(profile.location or "")),
+    website=ui.text("What is your website URL?", instruction="(Optional)", default=(profile.website or ""))
   ).ask()
-
   data["education"] = profile.education if profile else []
 
-  ui.list_editor(
-    "Education history",
-    data["education"],
-    display_fn=lambda e: ui.print(f"{e.institution} - {e.program}"), # TODO: MAke better
-    modify_fn=_setup_one_education,
-    label_fn=lambda e: f"{e.institution} - {e.program}"
-  )
-
+  if data is None:
+    return
+  
   profile = Profile(**data)
   profile.save()
 
+def setup_education():
+  profile = Profile.load() or Profile.empty()
+  education_history = profile.education if profile else []
+
+  ui.list_editor(
+    "Education history",
+    education_history,
+    display_fn=_display_education,
+    modify_fn=_modify_education,
+    label_fn=lambda e: f"{e.institution} - {e.program}"
+  )
+
+  profile.education = education_history
+  profile.save()
+
+# TODO: Make not shit
 def show_profile():
   profile = Profile.load()
 
   if not profile:
-    ui.print("No profile found. Please create a profile first.")
+    ui.print("No profile found.")
     return
   
-  ui.print("Current Profile:")
-  ui.print(f"Full Name: {profile.full_name}")
-  ui.print(f"Email: {profile.email}")
-  ui.print(f"Phone: {profile.phone}")
-  ui.print(f"Location: {profile.location}")
-  ui.print(f"Website: {profile.website}")
+  ui.print_key_values({
+    "Full Name": profile.full_name,
+    "Email": profile.email,
+    "Phone": profile.phone,
+    "Location": profile.location or "N/A",
+    "Website": profile.website or "N/A"
+  })
+  ui.print("\nEducation History:")
+  for edu in profile.education:
+    _display_education(edu)
